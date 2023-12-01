@@ -3,15 +3,12 @@
 
 package day01
 
-private fun processDigits(lines: List<String>): Int =
-    lines.sumOf { line ->
+fun answer1(input: String): Int =
+    input.trimIndent().lines().sumOf { line ->
         val firstDigit = line.firstOrNull(Char::isDigit)?.digitToInt() ?: 0
         val lastDigit = line.lastOrNull(Char::isDigit)?.digitToInt() ?: 0
         10 * firstDigit + lastDigit
     }
-
-fun answer1(input: String): Int =
-    processDigits(input.trimIndent().lines())
 
 private val replaceWords = listOf(
     "one" to 1,
@@ -26,9 +23,9 @@ private val replaceWords = listOf(
 )
 
 fun answer2(input: String): Int {
-    val lines = input.trimIndent().lines()
-
     // A generic function to process a line forwards or backwards to get the "digit."
+    // There can be overlaps, e.g. twone, so we have to be careful to get the right answer.
+    // 4twone should give 41 (4tw1) and not 42 (42ne), hence the bidirectional processing.
     fun aux(s: String,
             extractor: (String) -> Char,
             matcher: (String, String) -> Boolean,
@@ -41,9 +38,8 @@ fun answer2(input: String): Int {
 
     val forward = { s: String -> aux(s, String::first, String::startsWith, String::drop) }
     val backward = { s: String -> aux(s, String::last, String::endsWith, String::dropLast) }
-    return lines.sumOf { line -> 10 * forward(line) + backward(line) }
+    return input.trimIndent().lines().sumOf { line -> 10 * forward(line) + backward(line) }
 }
-
 
 fun main() {
     val input = object {}.javaClass.getResource("/day01/20231201")!!.readText()
