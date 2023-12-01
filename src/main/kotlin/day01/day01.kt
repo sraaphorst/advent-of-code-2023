@@ -4,10 +4,10 @@
 package day01
 
 private fun processDigits(lines: List<String>): Int =
-    // This could greatly be optimized. We can stop after first digit in either direction.
     lines.sumOf { line ->
-        val digits = line.filter(Char::isDigit)
-        10 * digits.first().digitToInt() + digits.last().digitToInt()
+        val firstDigit = line.firstOrNull(Char::isDigit)?.digitToInt() ?: 0
+        val lastDigit = line.lastOrNull(Char::isDigit)?.digitToInt() ?: 0
+        10 * firstDigit + lastDigit
     }
 
 fun answer1(input: String): Int =
@@ -29,22 +29,22 @@ fun answer2(input: String): Int {
     val lines = input.trimIndent().lines()
 
     // Find the first digit in each line.
-    fun auxFirst(remain: String): Int =
+    fun auxForward(remain: String): Int =
         if (remain.first().isDigit()) remain.first().digitToInt()
         else {
             val word = replaceWords.find { w -> remain.startsWith(w.first) }
-            word?.second ?: auxFirst(remain.drop(1))
+            word?.second ?: auxForward(remain.drop(1))
         }
 
     // Find the last digit in each line.
-    fun auxLast(remain: String): Int =
+    fun auxBackward(remain: String): Int =
         if (remain.last().isDigit()) remain.last().digitToInt()
         else {
             val word = replaceWords.find { w -> remain.endsWith(w.first) }
-            word?.second ?: auxLast(remain.dropLast(1))
+            word?.second ?: auxBackward(remain.dropLast(1))
         }
 
-    return lines.sumOf { l -> 10 * auxFirst(l) + auxLast(l) }
+    return lines.sumOf { line -> 10 * auxForward(line) + auxBackward(line) }
 }
 
 
@@ -52,9 +52,9 @@ fun main() {
     val input = object {}.javaClass.getResource("/day01/20231201")!!.readText()
     println("--- Day1: Trebuchet! ---")
 
-//    // Answer 1: 55621
+    // Answer 1: 55621
     println("Part 1: ${answer1(input)}")
 
-    // Answer 2: 53587 is too low... should be 53592.
+    // Answer 2: 53592.
     print("Part 2: ${answer2(input)}")
 }
