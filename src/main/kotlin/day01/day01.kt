@@ -28,23 +28,20 @@ private val replaceWords = listOf(
 fun answer2(input: String): Int {
     val lines = input.trimIndent().lines()
 
-    // Find the first digit in each line.
-    fun auxForward(remain: String): Int =
-        if (remain.first().isDigit()) remain.first().digitToInt()
+    // A generic function to process a line forwards or backwards to get the "digit."
+    fun aux(s: String,
+            extractor: (String) -> Char,
+            matcher: (String, String) -> Boolean,
+            dropper: (String, Int) -> String): Int =
+        if (extractor(s).isDigit()) extractor(s).digitToInt()
         else {
-            val word = replaceWords.find { w -> remain.startsWith(w.first) }
-            word?.second ?: auxForward(remain.drop(1))
+            val word = replaceWords.find { w -> matcher(s, w.first) }
+            word?.second ?: aux(dropper(s, 1), extractor, matcher, dropper)
         }
 
-    // Find the last digit in each line.
-    fun auxBackward(remain: String): Int =
-        if (remain.last().isDigit()) remain.last().digitToInt()
-        else {
-            val word = replaceWords.find { w -> remain.endsWith(w.first) }
-            word?.second ?: auxBackward(remain.dropLast(1))
-        }
-
-    return lines.sumOf { line -> 10 * auxForward(line) + auxBackward(line) }
+    val forward = { s: String -> aux(s, String::first, String::startsWith, String::drop) }
+    val backward = { s: String -> aux(s, String::last, String::endsWith, String::dropLast) }
+    return lines.sumOf { line -> 10 * forward(line) + backward(line) }
 }
 
 
@@ -55,6 +52,6 @@ fun main() {
     // Answer 1: 55621
     println("Part 1: ${answer1(input)}")
 
-    // Answer 2: 53592.
+    // Answer 2: 53592
     print("Part 2: ${answer2(input)}")
 }
