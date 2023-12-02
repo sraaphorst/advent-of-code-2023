@@ -42,8 +42,9 @@ fun answer2(input: String): Int {
 }
 
 fun main() {
-    val input = object {}.javaClass.getResource("/day01/20231201")!!.readText()
-    println("--- Day1: Trebuchet! ---")
+    val input = object {}.javaClass.getResource("/day01.txt")!!.readText()
+
+    println("--- Day 1: Trebuchet! ---")
 
     // Answer 1: 55621
     println("Part 1: ${answer1(input)}")
