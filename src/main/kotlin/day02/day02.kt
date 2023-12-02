@@ -6,13 +6,15 @@ package day02
 data class Round(val red: Int = 0, val green: Int = 0, val blue: Int = 0) {
 
     companion object {
-        fun parse(round: String): Round = round.split(",")
-            .map { it.trim().split(" ") }
-            .fold(Round()) { acc, (count, color) -> when (color) {
-                    "red" -> acc.copy(red = count.toInt())
+        fun parse(round: String): Round =
+            round
+                .split(",")
+                .map { it.trim().split(" ") }
+                .fold(Round()) { acc, (count, color) -> when (color) {
+                    "red"   -> acc.copy(red   = count.toInt())
                     "green" -> acc.copy(green = count.toInt())
-                    "blue" -> acc.copy(blue = count.toInt())
-                    else -> acc
+                    "blue"  -> acc.copy(blue  = count.toInt())
+                    else    -> acc
                 }
             }
     }
@@ -29,9 +31,8 @@ data class Game(val gameIdx: Int, val rounds: Set<Round>) {
         fun parse(input: String): Game = Game(
             gameIdx = input.substringBefore(":").filter { it.isDigit() }.toInt(),
             rounds = input.substringAfter(":")
-                .trim()
                 .split(";")
-                .map { Round.parse(it.trim()) }
+                .map(Round::parse)
                 .toSet()
         )
     }
@@ -40,18 +41,13 @@ data class Game(val gameIdx: Int, val rounds: Set<Round>) {
 fun answer1(games: List<Game>): Int =
     games
         .filter { game -> game.rounds.all { it.red <= 12 && it.green <= 13 && it.blue <= 14 } }
-        .map(Game::gameIdx)
-        .sum()
+        .sumOf(Game::gameIdx)
 
 fun answer2(games: List<Game>): Int =
-    games
-        .map(Game::power)
-        .sum()
+    games.sumOf(Game::power)
 
 fun parse(input: String): List<Game> =
-    input
-        .lines()
-        .map(Game::parse)
+    input.lines().map(Game::parse)
 
 fun main() {
     val games = parse(object {}.javaClass.getResource("/day02.txt")!!.readText())
@@ -61,6 +57,6 @@ fun main() {
     // Answer 1: 2256
     println("Part 1: ${answer1(games)}")
 
-    // Answer 2:
+    // Answer 2: 74229
     println("Part 2: ${answer2(games)}")
 }
