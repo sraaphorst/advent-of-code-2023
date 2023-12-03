@@ -4,7 +4,7 @@
 package day01
 
 fun answer1(input: String): Int =
-    input.trimIndent().lines().sumOf { line ->
+    input.lines().sumOf { line ->
         val firstDigit = line.firstOrNull(Char::isDigit)?.digitToInt() ?: 0
         val lastDigit = line.lastOrNull(Char::isDigit)?.digitToInt() ?: 0
         10 * firstDigit + lastDigit
@@ -38,7 +38,7 @@ fun answer2(input: String): Int {
 
     val forward = { s: String -> aux(s, String::first, String::startsWith, String::drop) }
     val backward = { s: String -> aux(s, String::last, String::endsWith, String::dropLast) }
-    return input.trimIndent().lines().sumOf { line -> 10 * forward(line) + backward(line) }
+    return input.lines().sumOf { line -> 10 * forward(line) + backward(line) }
 }
 
 fun main() {
