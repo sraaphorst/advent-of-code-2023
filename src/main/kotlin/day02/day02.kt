@@ -3,7 +3,7 @@
 
 package day02
 
-data class Round(val red: Int = 0, val green: Int = 0, val blue: Int = 0) {
+private data class Round(val red: Int = 0, val green: Int = 0, val blue: Int = 0) {
 
     companion object {
         fun parse(round: String): Round =
@@ -20,7 +20,7 @@ data class Round(val red: Int = 0, val green: Int = 0, val blue: Int = 0) {
     }
 }
 
-data class Game(val gameIdx: Int, val rounds: Set<Round>) {
+private data class Game(val gameIdx: Int, val rounds: Set<Round>) {
     val power: Int by lazy {
         (rounds.maxOfOrNull(Round::red) ?: 0) *
                 (rounds.maxOfOrNull(Round::green) ?: 0) *
@@ -38,25 +38,25 @@ data class Game(val gameIdx: Int, val rounds: Set<Round>) {
     }
 }
 
-fun answer1(games: List<Game>): Int =
-    games
+private fun parse(input: String): List<Game> =
+    input.lines().map(Game::parse)
+
+fun answer1(input: String): Int =
+    parse(input)
         .filter { game -> game.rounds.all { it.red <= 12 && it.green <= 13 && it.blue <= 14 } }
         .sumOf(Game::gameIdx)
 
-fun answer2(games: List<Game>): Int =
-    games.sumOf(Game::power)
-
-fun parse(input: String): List<Game> =
-    input.lines().map(Game::parse)
+fun answer2(input: String): Int =
+    parse(input).sumOf(Game::power)
 
 fun main() {
-    val games = parse(object {}.javaClass.getResource("/day02.txt")!!.readText())
+    val input = object {}.javaClass.getResource("/day02.txt")!!.readText()
 
     println("--- Day 2: Cube Conundrum ---")
 
     // Answer 1: 2256
-    println("Part 1: ${answer1(games)}")
+    println("Part 1: ${answer1(input)}")
 
     // Answer 2: 74229
-    println("Part 2: ${answer2(games)}")
+    println("Part 2: ${answer2(input)}")
 }
