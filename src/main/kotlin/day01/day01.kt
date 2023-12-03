@@ -3,13 +3,6 @@
 
 package day01
 
-fun answer1(input: String): Int =
-    input.lines().sumOf { line ->
-        val firstDigit = line.firstOrNull(Char::isDigit)?.digitToInt() ?: 0
-        val lastDigit = line.lastOrNull(Char::isDigit)?.digitToInt() ?: 0
-        10 * firstDigit + lastDigit
-    }
-
 private val replaceWords = listOf(
     "one" to 1,
     "two" to 2,
@@ -21,6 +14,13 @@ private val replaceWords = listOf(
     "eight" to 8,
     "nine" to 9
 )
+
+fun answer1(input: String): Int =
+    input.lines().sumOf { line ->
+        val firstDigit = line.firstOrNull(Char::isDigit)?.digitToInt() ?: 0
+        val lastDigit = line.lastOrNull(Char::isDigit)?.digitToInt() ?: 0
+        10 * firstDigit + lastDigit
+    }
 
 fun answer2(input: String): Int {
     // A generic function to process a line forwards or backwards to get the "digit."

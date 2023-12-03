@@ -27,11 +27,11 @@ class Day02Test {
 
     @Test
     fun `Problem 1 example`() {
-        assertEquals(8, answer1(parse(input1)))
+        assertEquals(8, answer1(input1))
     }
 
     @Test
     fun `Problem 2 example`() {
-        assertEquals(2286, answer2(parse(input2)))
+        assertEquals(2286, answer2(input2))
     }
 }
