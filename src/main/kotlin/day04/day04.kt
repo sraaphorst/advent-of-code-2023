@@ -14,8 +14,7 @@ private data class Card(val id: Int, val winningNumbers: Set<Int>, val numbers: 
             // Eliminate all duplicate spaces before starting the parsing.
             val (idStr, numSetStr1, numSetStr2) = input.replace("  ", " ").split(": ", "|").map(String::trim)
             val id = idStr.split(" ").last().toInt()
-            val winningNumbers = numSetStr1.split(' ').map(String::toInt).toSet()
-            val numbers = numSetStr2.split(' ').map(String::toInt).toSet()
+            val (winningNumbers, numbers) = listOf(numSetStr1, numSetStr2).map { it.split(' ').map(String::toInt).toSet() }
             return Card(id, winningNumbers, numbers)
         }
     }
