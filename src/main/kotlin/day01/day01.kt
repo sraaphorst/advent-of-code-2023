@@ -16,7 +16,7 @@ private val replaceWords = listOf(
 )
 
 fun answer1(input: String): Int =
-    input.lines().sumOf { line ->
+    input.lineSequence().sumOf { line ->
         val firstDigit = line.firstOrNull(Char::isDigit)?.digitToInt() ?: 0
         val lastDigit = line.lastOrNull(Char::isDigit)?.digitToInt() ?: 0
         10 * firstDigit + lastDigit
@@ -38,13 +38,13 @@ fun answer2(input: String): Int {
 
     val forward = { s: String -> aux(s, String::first, String::startsWith, String::drop) }
     val backward = { s: String -> aux(s, String::last, String::endsWith, String::dropLast) }
-    return input.lines().sumOf { line -> 10 * forward(line) + backward(line) }
+    return input.lineSequence().sumOf { line -> 10 * forward(line) + backward(line) }
 }
 
 fun main() {
     val input = object {}.javaClass.getResource("/day01.txt")!!.readText()
 
-    println("--- Day 1: Trebuchet! ---")
+    println("--- Day 1: Trebuchet?! ---")
 
     // Answer 1: 55621
     println("Part 1: ${answer1(input)}")

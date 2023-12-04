@@ -38,8 +38,8 @@ private data class Game(val gameIdx: Int, val rounds: Set<Round>) {
     }
 }
 
-private fun parse(input: String): List<Game> =
-    input.lines().map(Game::parse)
+private fun parse(input: String): Sequence<Game> =
+    input.lineSequence().map(Game::parse)
 
 fun answer1(input: String): Int =
     parse(input)
