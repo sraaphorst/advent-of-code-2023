@@ -15,11 +15,11 @@ private data class Card(val id: Int, val winningNumbers: Set<Int>, val numbers: 
 
     companion object {
         fun parse(input: String): Card {
-            val parts = input.split(':').map(String::trim)
-            val id = parts[0].split(' ').last().toInt()
-            val sets = parts[1].split('|').map(String::trim)
-            val winningNumbers = sets[0].split(' ').filterNot(String::isEmpty).map(String::toInt).toSet()
-            val numbers = sets[1].split(' ').filterNot(String::isEmpty).map(String::toInt).toSet()
+            // Eliminate all duplicate spaces before starting the parsing.
+            val (idStr, numSetStr1, numSetStr2) = input.replace("  ", " ").split(": ", "|").map(String::trim)
+            val id = idStr.split(" ").last().toInt()
+            val winningNumbers = numSetStr1.split(' ').map(String::toInt).toSet()
+            val numbers = numSetStr2.split(' ').map(String::toInt).toSet()
             return Card(id, winningNumbers, numbers)
         }
     }
