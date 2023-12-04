@@ -4,14 +4,10 @@
 package day04
 
 private data class Card(val id: Int, val winningNumbers: Set<Int>, val numbers: Set<Int>) {
-    val matches: Int by lazy {
-        winningNumbers.intersect(numbers).size
-    }
-
-    val points: Int by lazy {
+    val matches: Int = winningNumbers.intersect(numbers).size
+    val points: Int =
         if (matches == 0) 0
         else 1 shl (matches - 1)
-    }
 
     companion object {
         fun parse(input: String): Card {
