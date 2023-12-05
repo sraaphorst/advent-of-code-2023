@@ -40,9 +40,9 @@ private data class Mapping(val entries: List<MappingEntry>) {
     }
 }
 
-private fun parser(input: String, seedParser: (String) -> Sequence<LongRange>): Pair<Sequence<LongRange>, List<Mapping>> {
+private fun parser(input: String, seedParser: (String) -> List<LongRange>): Pair<List<LongRange>, List<Mapping>> {
     val (seedsString, mapsText) = input.trim().split('\n', limit=2)
-    val seedSeq = seedsString
+    val seeds = seedsString
         .split(':')[1]
         .trim()
         .let(seedParser)
@@ -50,32 +50,37 @@ private fun parser(input: String, seedParser: (String) -> Sequence<LongRange>): 
     // Now parse each of the sections.
     val mappings = mapsText.trim().split("\n\n").map(Mapping::parse)
 
-    return seedSeq to mappings
+    return seeds to mappings
 }
 
+// For each seed, pass through the maps to find the location the seed can be planted.
+// To be able to reuse the code for both problem parts, we represent seeds as LongRange.
+// In this case, the LongRange has the same lower and upper bound, so it is really just a
+// Long, but as we treat it as a LongRange, we have to call minOf on it to reduce it to a
+// single value, hence the nested minOf calls.
 fun answer1(input: String): Long {
-    val (seedSeq, mappings) = parser(input, ::parseSeeds)
-    return seedSeq.minOf { it.minOf { seed ->
+    val (seeds, mappings) = parser(input, ::parseSeeds)
+    return seeds.minOf { it.minOf { seed ->
         mappings.fold(seed){ acc, map -> map.lookup(acc) }
     }}
 }
 
-private fun parseSeeds(input: String): Sequence<LongRange> =
-    input.split(' ').asSequence().map{ it.toLong()..it.toLong() }
+private fun parseSeeds(input: String): List<LongRange> =
+    input.split(' ').map { it.toLong()..it.toLong() }
 
-// Due to the enormous sizes, we instead work backwards, looking for the lowest numbered location that
-// corresponds to a seed.
+// Due to the enormous sizes, we instead work backwards through the mappings,
+// looking for the lowest numbered location that corresponds to a valid seed.
 fun answer2(input: String): Long {
-    val (seedSeq, mappings) = parser(input, ::parseSeedRanges)
-    val reverseMappings = mappings.reversed()
+    val (seeds, mappings) = parser(input, ::parseSeedRanges)
+    val reversedMappings = mappings.reversed()
 
     return generateSequence(0L) { it + 1 }.filter { location ->
-        val seed = reverseMappings.fold(location){ acc, map -> map.reverseLookup(acc) }
-        seedSeq.any { it.contains(seed) }
+        val seed = reversedMappings.fold(location){ acc, map -> map.reverseLookup(acc) }
+        seeds.any { it.contains(seed) }
     }.first()
 }
 
-private fun parseSeedRanges(input: String): Sequence<LongRange> =
+private fun parseSeedRanges(input: String): List<LongRange> =
     input
         .split(' ')
         .windowed(2, 2)
@@ -83,7 +88,6 @@ private fun parseSeedRanges(input: String): Sequence<LongRange> =
             val lower = it[0].toLong()
             val upper = lower + it[1].toLong()
             (lower..upper) }
-        .asSequence()
 
 fun main() {
     val input = object {}.javaClass.getResource("/day05.txt")!!.readText()
