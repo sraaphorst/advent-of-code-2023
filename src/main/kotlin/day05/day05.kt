@@ -83,11 +83,9 @@ fun answer2(input: String): Long {
 private fun parseSeedRanges(input: String): List<LongRange> =
     input
         .split(' ')
+        .map(String::toLong)
         .windowed(2, 2)
-        .map {
-            val lower = it[0].toLong()
-            val upper = lower + it[1].toLong()
-            (lower..upper) }
+        .map { (lower, length) -> lower..(lower + length) }
 
 fun main() {
     val input = object {}.javaClass.getResource("/day05.txt")!!.readText()
