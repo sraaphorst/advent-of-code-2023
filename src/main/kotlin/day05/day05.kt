@@ -4,8 +4,17 @@
 package day05
 
 private data class MappingEntry(val destinationStart: Long, val sourceStart: Long, val length: Long) {
+    // Precalculate to avoid repeatedly creating these ranges.
+    private val sourceRange: LongRange = (sourceStart..(sourceStart + length))
+    private val destinationRange: LongRange = (destinationStart..(destinationStart + length))
+
     fun lookup(source: Long): Long? =
-        if (source in (sourceStart..(sourceStart + length))) destinationStart + (source - sourceStart)
+        // Check for intersection.
+        if (source in sourceRange) destinationStart + (source - sourceStart)
+        else null
+
+    fun reverseLookup(destination: Long): Long? =
+        if (destination in destinationRange) sourceStart + (destination - destinationStart)
         else null
 
     companion object {
@@ -16,52 +25,65 @@ private data class MappingEntry(val destinationStart: Long, val sourceStart: Lon
     }
 }
 
-private data class Mapping(val entries: Sequence<MappingEntry>) {
+// Note that using a List<MappingEntry> here with firstNotNullOfOrNull is immensely faster than using a
+// Sequence<MappingEntry> here with mapNotNull and firstOrNull. The List approach takes a couple of minutes.
+private data class Mapping(val entries: List<MappingEntry>) {
     fun lookup(source: Long): Long =
-        entries.mapNotNull { it.lookup(source)  }.firstOrNull() ?: source
+        entries.firstNotNullOfOrNull { it.lookup(source) } ?: source
+
+    fun reverseLookup(destination: Long): Long =
+        entries.firstNotNullOfOrNull { it.reverseLookup(destination) } ?: destination
 
     companion object {
         fun parse(input: String): Mapping =
-            Mapping(input.trim().lineSequence().drop(1).map(MappingEntry::parse))
+            Mapping(input.trim().lines().drop(1).map(MappingEntry::parse))
     }
 }
 
-private fun answer(input: String, seedParser: (String) -> Set<Long>): Long {
+private fun parser(input: String, seedParser: (String) -> Sequence<LongRange>): Pair<Sequence<LongRange>, List<Mapping>> {
     val (seedsString, mapsText) = input.trim().split('\n', limit=2)
-    val seedSet = seedsString
+    val seedSeq = seedsString
         .split(':')[1]
-            .trim()
-            .let(seedParser)
-    println("Seed set size: ${seedSet.size}")
+        .trim()
+        .let(seedParser)
 
     // Now parse each of the sections.
     val mappings = mapsText.trim().split("\n\n").map(Mapping::parse)
 
-    return seedSet.minOf {
-        mappings.fold(it) { value, mapping ->
-            mapping.lookup(value)
-        }
-    }
+    return seedSeq to mappings
 }
 
-fun answer1(input: String): Long =
-    answer(input, ::parseSeeds)
+fun answer1(input: String): Long {
+    val (seedSeq, mappings) = parser(input, ::parseSeeds)
+    return seedSeq.minOf { it.minOf { seed ->
+        mappings.fold(seed){ acc, map -> map.lookup(acc) }
+    }}
+}
 
-private fun parseSeeds(input: String): Set<Long> =
-    input.split(' ').map(String::toLong).toSet()
+private fun parseSeeds(input: String): Sequence<LongRange> =
+    input.split(' ').asSequence().map{ it.toLong()..it.toLong() }
 
-fun answer2(input: String): Long =
-    answer(input, ::parseSeedRanges)
+// Due to the enormous sizes, we instead work backwards, looking for the lowest numbered location that
+// corresponds to a seed.
+fun answer2(input: String): Long {
+    val (seedSeq, mappings) = parser(input, ::parseSeedRanges)
+    val reverseMappings = mappings.reversed()
 
-private fun parseSeedRanges(input: String): Set<Long> =
+    return generateSequence(0L) { it + 1 }.filter { location ->
+        val seed = reverseMappings.fold(location){ acc, map -> map.reverseLookup(acc) }
+        seedSeq.any { it.contains(seed) }
+    }.first()
+}
+
+private fun parseSeedRanges(input: String): Sequence<LongRange> =
     input
         .split(' ')
         .windowed(2, 2)
-        .flatMap {
+        .map {
             val lower = it[0].toLong()
             val upper = lower + it[1].toLong()
-            (lower..upper).toSet() }
-            .toSet()
+            (lower..upper) }
+        .asSequence()
 
 fun main() {
     val input = object {}.javaClass.getResource("/day05.txt")!!.readText()
@@ -71,6 +93,6 @@ fun main() {
     // Answer 1: 178159714
     println("Part 1: ${answer1(input)}")
 
-    // Answer 2: 9997537
+    // Answer 2: 100165128
     print("Part 2: ${answer2(input)}")
 }
