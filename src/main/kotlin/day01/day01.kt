@@ -50,5 +50,5 @@ fun main() {
     println("Part 1: ${answer1(input)}")
 
     // Answer 2: 53592
-    print("Part 2: ${answer2(input)}")
+    println("Part 2: ${answer2(input)}")
 }
