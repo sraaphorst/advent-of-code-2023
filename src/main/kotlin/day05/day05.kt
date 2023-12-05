@@ -5,8 +5,8 @@ package day05
 
 private data class MappingEntry(val destinationStart: Long, val sourceStart: Long, val length: Long) {
     // Precalculate to avoid repeatedly creating these ranges.
-    private val sourceRange: LongRange = (sourceStart..(sourceStart + length))
-    private val destinationRange: LongRange = (destinationStart..(destinationStart + length))
+    private val sourceRange: LongRange = sourceStart..(sourceStart + length)
+    private val destinationRange: LongRange = destinationStart..(destinationStart + length)
 
     fun lookup(source: Long): Long? =
         // Check for intersection.
@@ -76,7 +76,7 @@ fun answer2(input: String): Long {
 
     return generateSequence(0L) { it + 1 }.filter { location ->
         val seed = reversedMappings.fold(location){ acc, map -> map.reverseLookup(acc) }
-        seeds.any { it.contains(seed) }
+        seeds.any { seed in it }
     }.first()
 }
 
