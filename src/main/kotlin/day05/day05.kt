@@ -84,7 +84,7 @@ private fun parseSeedRanges(input: String): List<LongRange> =
     input
         .split(' ')
         .map(String::toLong)
-        .windowed(2, 2)
+        .chunked(2)
         .map { (lower, length) -> lower..(lower + length) }
 
 fun main() {
