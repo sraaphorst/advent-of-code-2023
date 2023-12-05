@@ -40,7 +40,7 @@ private data class Mapping(val entries: List<MappingEntry>) {
     }
 }
 
-private fun parser(input: String, seedParser: (String) -> List<LongRange>): Pair<List<LongRange>, List<Mapping>> {
+private fun parse(input: String, seedParser: (String) -> List<LongRange>): Pair<List<LongRange>, List<Mapping>> {
     val (seedsString, mapsText) = input.trim().split('\n', limit=2)
     val seeds = seedsString
         .split(':')[1]
@@ -59,7 +59,7 @@ private fun parser(input: String, seedParser: (String) -> List<LongRange>): Pair
 // Long, but as we treat it as a LongRange, we have to call minOf on it to reduce it to a
 // single value, hence the nested minOf calls.
 fun answer1(input: String): Long {
-    val (seeds, mappings) = parser(input, ::parseSeeds)
+    val (seeds, mappings) = parse(input, ::parseSeeds)
     return seeds.minOf { it.minOf { seed ->
         mappings.fold(seed){ acc, map -> map.lookup(acc) }
     }}
@@ -71,7 +71,7 @@ private fun parseSeeds(input: String): List<LongRange> =
 // Due to the enormous sizes, we instead work backwards through the mappings,
 // looking for the lowest numbered location that corresponds to a valid seed.
 fun answer2(input: String): Long {
-    val (seeds, mappings) = parser(input, ::parseSeedRanges)
+    val (seeds, mappings) = parse(input, ::parseSeedRanges)
     val reversedMappings = mappings.reversed()
 
     return generateSequence(0L) { it + 1 }.filter { location ->
