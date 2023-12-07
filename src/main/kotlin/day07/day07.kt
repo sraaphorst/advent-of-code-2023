@@ -16,11 +16,10 @@ private enum class HandType(val value: Int, val cardCounts: List<Int>) {
 }
 
 private data class Hand(val cards: List<Int>, val bet: Int) {
-    private fun calculateType(counts: List<Int>): Int =
+    private fun calculateType(counts: List<Int>): HandType =
         HandType
             .entries
-            .firstOrNull { counts == it.cardCounts }
-            ?.let(HandType::value) ?: 0
+            .first { counts == it.cardCounts }
 
     private fun getCounts(modifiedCards: List<Int>): List<Int> =
         modifiedCards
@@ -30,10 +29,10 @@ private data class Hand(val cards: List<Int>, val bet: Int) {
             .values
             .sortedDescending()
 
-    val type: Int = calculateType(getCounts(cards))
+    val type: HandType = calculateType(getCounts(cards))
 
     // The type treating jacks as jokers.
-    val jokerType: Int = run {
+    val jokerType: HandType = run {
         val jokerCount = cards.count { it == JOKER_VALUE }
         val cardCounts = getCounts(cards.filterNot { it == JOKER_VALUE })
 
@@ -49,8 +48,8 @@ private data class Hand(val cards: List<Int>, val bet: Int) {
         const val JOKER_VALUE: Int = 0
 
         // Compare two hands to determine which one is greater than the other.
-        fun comparator(typeSelector: (Hand) -> Int) = Comparator<Hand> { h1, h2 ->
-            typeSelector(h1).compareTo(typeSelector(h2)).takeUnless { it == 0 }
+        fun comparator(typeSelector: (Hand) -> HandType) = Comparator<Hand> { h1, h2 ->
+            typeSelector(h1).value.compareTo(typeSelector(h2).value).takeUnless { it == 0 }
                 ?: h1.cards.zip(h2.cards)
                     .firstOrNull { (c1, c2) -> c1 != c2 }
                     ?.let { (c1, c2) -> c1.compareTo(c2) }
@@ -77,7 +76,7 @@ private data class Hand(val cards: List<Int>, val bet: Int) {
     }
 }
 
-private fun answer(input: String, typeExtractor: (Hand) -> Int, cardMap: CardMap): Int =
+private fun answer(input: String, typeExtractor: (Hand) -> HandType, cardMap: CardMap): Int =
     input
         .lines()
         .map(Hand.parse(cardMap))
