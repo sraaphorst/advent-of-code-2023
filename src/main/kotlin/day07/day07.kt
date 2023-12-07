@@ -34,13 +34,15 @@ private data class Hand(val cards: List<Int>, val bet: Int) {
 
     // The type treating jacks as jokers.
     val jokerType: Int = run {
-            val jokerCount = cards.count { it == JOKER_VALUE }
-            val cardCounts = getCounts(cards.filterNot { it == JOKER_VALUE })
+        val jokerCount = cards.count { it == JOKER_VALUE }
+        val cardCounts = getCounts(cards.filterNot { it == JOKER_VALUE })
 
-            // If cardCounts is not empty, then add the number of jokers to the highest count.
-            // If it is empty, then all cards were jokers, so make the cardCounts 5.
-            calculateType(if (cardCounts.isEmpty()) listOf(jokerCount)
-                          else listOf(cardCounts.first() + jokerCount) + cardCounts.drop(1))
+        // If cardCounts is not empty, then add the number of jokers to the highest count.
+        // If it is empty, then all cards were jokers, so make the cardCounts 5.
+        calculateType(
+            if (cardCounts.isEmpty()) listOf(jokerCount)
+            else listOf(cardCounts.first() + jokerCount) + cardCounts.drop(1)
+        )
     }
 
     companion object {
@@ -66,24 +68,28 @@ private data class Hand(val cards: List<Int>, val bet: Int) {
         // For part 2, make J the weakest card (value 0).
         val CardMap2: CardMap = CardMap1.mapValues { (k, v) -> if (k == 'J') JOKER_VALUE else v }
 
-        fun parse(input: String, cardMap: CardMap) =
-            input.trim().split(" ").let { (cs, bs) -> Hand(cs.map(cardMap::getValue), bs.toInt())  }
+        fun parse(cardMap: CardMap): (String) -> Hand = {
+            it
+                .trim()
+                .split(" ")
+                .let { (cs, bs) -> Hand(cs.map(cardMap::getValue), bs.toInt()) }
+        }
     }
 }
 
-private fun answer(input: String, comparator: Comparator<Hand>, cardMap: CardMap): Int =
+private fun answer(input: String, typeExtractor: (Hand) -> Int, cardMap: CardMap): Int =
     input
         .lines()
-        .map { Hand.parse(it, cardMap) }
-        .sortedWith(comparator)
+        .map(Hand.parse(cardMap))
+        .sortedWith(Hand.comparator(typeExtractor))
         .withIndex()
         .sumOf { (idx, hand) -> (idx + 1) * hand.bet }
 
 fun answer1(input: String): Int =
-    answer(input, Hand.comparator(Hand::type), Hand.CardMap1)
+    answer(input, Hand::type, Hand.CardMap1)
 
 fun answer2(input: String): Int =
-    answer(input, Hand.comparator(Hand::jokerType), Hand.CardMap2)
+    answer(input, Hand::jokerType, Hand.CardMap2)
 
 fun main() {
     val input = object {}.javaClass.getResource("/day07.txt")!!.readText()
