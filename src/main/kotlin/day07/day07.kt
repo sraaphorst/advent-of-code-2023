@@ -39,8 +39,10 @@ private data class Hand(val cards: List<Int>, val bet: Int) {
 
         // If cardCounts is not empty, then add the number of jokers to the highest count.
         // If it is empty, then all cards were jokers, so make the cardCounts 5.
-        calculateType(if (cardCounts.isEmpty()) listOf(jokerCount)
-        else listOf(cardCounts.first() + jokerCount) + cardCounts.drop(1))
+        calculateType(
+            if (cardCounts.isEmpty()) listOf(jokerCount)
+            else listOf(cardCounts.first() + jokerCount) + cardCounts.drop(1)
+        )
     }
 
     companion object {
