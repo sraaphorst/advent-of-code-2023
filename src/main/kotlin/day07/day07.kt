@@ -5,35 +5,38 @@ package day07
 
 private typealias CardMap = Map<Char, Int>
 
-private data class Hand(val cards: List<Int>, val bet: Int) {
-    private fun calculateType(counts: List<Int>): Int = when (counts) {
-        listOf(5) -> 6
-        listOf(4, 1) -> 5
-        listOf(3, 2) -> 4
-        listOf(3, 1, 1) -> 3
-        listOf(2, 2, 1) -> 2
-        listOf(2, 1, 1, 1) -> 1
-        listOf(1, 1, 1, 1, 1) -> 0
-        else -> 0
-    }
+private enum class HandType(val value: Int, val cardCounts: List<Int>) {
+    FiveOfAKind(6, listOf(5)),
+    FourOfAKind(5, listOf(4, 1)),
+    FullHouse(4, listOf(3, 2)),
+    ThreeOfAKind(3, listOf(3, 1, 1)),
+    TwoPair(2, listOf(2, 2, 1)),
+    Pair(1, listOf(2, 1, 1, 1)),
+    High(0, listOf(1, 1, 1, 1, 1))
+}
 
-    val type: Int = calculateType(cards
-        .groupingBy { it }
-        .eachCount()
-        .filterValues { it != 0 }
-        .values
-        .sortedDescending())
+private data class Hand(val cards: List<Int>, val bet: Int) {
+    private fun calculateType(counts: List<Int>): Int =
+        HandType
+            .entries
+            .firstOrNull { counts == it.cardCounts }
+            ?.let(HandType::value) ?: 0
+
+    private fun getCounts(modifiedCards: List<Int>): List<Int> =
+        modifiedCards
+            .groupingBy { it }
+            .eachCount()
+            .filterValues { it != 0 }
+            .values
+            .sortedDescending()
+
+    val type: Int = calculateType(getCounts(cards))
 
     // The type treating jacks as jokers.
     val jokerType: Int = run {
             val jokerCount = cards.count { it == JOKER_VALUE }
-            val cardCounts = cards
-                .filterNot { it == JOKER_VALUE }
-                .groupingBy { it }
-                .eachCount()
-                .filterValues { it != 0 }
-                .values
-                .sortedDescending()
+            val cardCounts = getCounts(cards.filterNot { it == JOKER_VALUE })
+
             // If cardCounts is not empty, then add the number of jokers to the highest count.
             // If it is empty, then all cards were jokers, so make the cardCounts 5.
             calculateType(if (cardCounts.isEmpty()) listOf(jokerCount)
