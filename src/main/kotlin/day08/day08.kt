@@ -23,21 +23,34 @@ private fun parse(input: String): Pair<List<Direction>, Network> {
     return directions to network
 }
 
-fun answer1(input: String): Int {
-    val (directions, network) = parse(input)
+private fun gcd(a: Long, b: Long): Long =
+    if (b == 0L) a else gcd(b, a % b)
 
-    tailrec fun aux(moves: Sequence<Direction> = sequence { while(true) yieldAll(directions) },
-                    node: String = "AAA",
-                    steps: Int = 0): Int = when {
-        node == "ZZZ" -> steps
+private fun lcm(a: Long, b: Long): Long =
+    (a * b) / gcd(a, b)
+
+private fun numSteps(directions: List<Direction>, network: Network, startNode: String, end: (String) -> Boolean): Long {
+    tailrec fun aux(moves: Sequence<Direction> = sequence { while (true) yieldAll(directions) },
+                    node: String = startNode,
+                    steps: Long = 0L): Long = when {
+        end(node) -> steps
         else -> aux(moves.drop(1), moves.first()(network.getValue(node)), steps + 1)
     }
 
     return aux()
 }
 
-fun answer2(input: String): Int =
-    TODO()
+fun answer1(input: String): Long =
+    parse(input).let { (directions, network) -> numSteps(directions, network, "AAA") { it == "ZZZ" } }
+
+fun answer2(input: String): Long {
+    val (directions, network) = parse(input)
+    val startNodes = network.keys.filter { it.last() == 'A' }
+    val endNodes = network.keys.filter { it.last() == 'Z' }
+
+    val steps = startNodes.map { node -> numSteps(directions, network, node) { it in endNodes} }
+    return steps.reduce { acc, num -> lcm(acc, num) }
+}
 
 fun main() {
     val input = object {}.javaClass.getResource("/day08.txt")!!.readText()
@@ -47,6 +60,6 @@ fun main() {
     // Answer 1: 20659
     println("Part 1: ${answer1(input)}")
 
-    // Answer 2: 254083736
-//    println("Part 2: ${answer2(input)}")
+    // Answer 2: 15690466351717
+    println("Part 2: ${answer2(input)}")
 }
