@@ -30,12 +30,15 @@ private fun lcm(a: Long, b: Long): Long =
     (a * b) / gcd(a, b)
 
 private fun numSteps(directions: List<Direction>, network: Network, startNode: String, end: (String) -> Boolean): Long {
-    tailrec fun aux(moves: Sequence<Direction> = sequence { while (true) yieldAll(directions) },
+    tailrec fun aux(directionIdx: Int = 0,
                     node: String = startNode,
-                    steps: Long = 0L): Long = when {
-        end(node) -> steps
-        else -> aux(moves.drop(1), moves.first()(network.getValue(node)), steps + 1)
-    }
+                    steps: Long = 0L): Long =
+        if (end(node)) steps
+        else {
+            val currentDirection = directions[directionIdx % directions.size]
+            val nextNode = currentDirection(network.getValue(node))
+            aux(directionIdx + 1, nextNode, steps + 1)
+        }
 
     return aux()
 }
