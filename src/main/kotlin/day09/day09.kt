@@ -4,9 +4,13 @@
 package day09
 
 private fun calculateSeq(seq: List<Int>): Int {
-    val diffs = seq.zipWithNext().map { (s1, s2) -> s2 - s1 }
-    val next = if (diffs.all { it == 0 }) 0 else calculateSeq(diffs)
-    return seq.last() + next
+    tailrec fun aux(currSeq: List<Int> = seq, acc: Int = 0): Int {
+        val diffs = currSeq.zipWithNext().map { (s1, s2) -> s2 - s1}
+        return if (diffs.all { it == 0 }) acc + currSeq.last()
+        else aux(diffs, acc + currSeq.last())
+    }
+
+    return aux()
 }
 
 private fun parse(input: String): Sequence<List<Int>> =
