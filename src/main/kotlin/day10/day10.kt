@@ -5,11 +5,11 @@ package day10
 
 private typealias Coord = Pair<Int, Int>
 
-private enum class Direction(val deltaX: Int, val deltaY: Int) {
-    NORTH(0, -1),
-    SOUTH(0, 1),
-    EAST(1, 0),
-    WEST(-1, 0)
+private enum class Direction(val deltaX: Int = 0, val deltaY: Int = 0) {
+    NORTH(deltaY = -1),
+    SOUTH(deltaY = 1),
+    EAST(deltaX = 1),
+    WEST(deltaX = -1)
 }
 
 private operator fun Coord.plus(direction: Direction): Coord =
@@ -22,28 +22,28 @@ private operator fun Direction.unaryMinus() = when(this) {
     Direction.WEST -> Direction.EAST
 }
 
-private enum class Pipe(val symbol: Char, val directions: Set<Direction>) {
+private enum class Pipe(val symbol: Char, val directions: Set<Direction> = emptySet()) {
     VERTICAL('|', setOf(Direction.NORTH, Direction.SOUTH)),
     HORIZONTAL('-', setOf(Direction.WEST, Direction.EAST)),
     NORTHEAST('L', setOf(Direction.NORTH, Direction.EAST)),
     NORTHWEST('J', setOf(Direction.NORTH, Direction.WEST)),
     SOUTHWEST('7', setOf(Direction.SOUTH, Direction.WEST)),
     SOUTHEAST('F', setOf(Direction.SOUTH, Direction.EAST)),
-    GROUND('.', emptySet()),
-    START('S', emptySet())
+    GROUND('.'),
+    START('S')
 }
 
 private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>) {
     val width = grid.keys.maxBy { it.first }.first
     val height = grid.keys.maxBy { it.second }.second
 
-    fun neighbourhood(coord: Coord): Set<Coord> =
+    private fun neighbourhood(coord: Coord): Set<Coord> =
         Direction
             .entries
             .map { (coord.first + it.deltaX) to (coord.second + it.deltaY) }
             .filter { it.first in (0..<width) && it.second in  (0..<height)}.toSet()
 
-    val startPiece: Pipe = run {
+    private val startPiece: Pipe = run {
         // Find the directions that lead into this pipe.
         val neighbours = neighbourhood(startCoord)
         val directionsIn = Direction.entries.filter { dir ->
@@ -105,24 +105,17 @@ fun answer1(input: String): Int =
 fun answer2(input: String): Int {
     val pipeMap = PipeMap.parse(input)
     val mainCurvePoints = findMainCurve(pipeMap)
-
-    // Now we use the Jordan Curve Theorem by casting a ray to the left for each point not on the main curve to
-    // determine if it is considered "inside" the main curve.
-    // If it crosses the main curve an odd number of times, it is inside the main curve.
-    // If it crosses the main curve an even number of times, it is outside the main curve.
-    // Due to the nature of the curve, we must decide what constitutes casting the main curve:
-    // For each point, we will consider casting out in the "top half" of the point.
-    // Thus, crossing the VERTICAL, NORTHEAST, and NORTHWEST pipe pieces will contribute to the crossing number, but
-    // crossing the HORIZONTAL, SOUTHEAST, and SOUTHWEST pipe pieces will not.
-    // In this case, we don't even bother counting the crossing number: we just alternate parity to determine
-    // which points return true.
-    // This could be optimized by going left or right (or even up or down, which would require different logic) but
-    // the optimization time improvement is not worth the effort.
     val crossings = setOf(Pipe.VERTICAL, Pipe.NORTHEAST, Pipe.NORTHWEST)
     return (pipeMap.allCoords - mainCurvePoints).count { coord ->
-        (0..<coord.first).fold(false) { parity, x ->
-            val checkCoord = (x to coord.second)
-            if (checkCoord in mainCurvePoints && pipeMap.getValue(checkCoord) in crossings) !parity else parity }
+        // We want the number of points inside the polygon that is the main curve.
+        // Cast a ray to the west from (the top half of) each point not on the main curve.
+        // Count the number of times it intersections VERTICAL, NORTHEAST, and NORTHWEST (due to casting from top half).
+        // By the ray casting algorithm for polygon point inclusion from the Jordan Curve Theorem,
+        // an even number of crossings means a point is out, and an odd number means a point is inside.
+        (0..<coord.first)
+            .map { it to coord.second }
+            .intersect(mainCurvePoints)
+            .count { pipeMap.getValue(it) in crossings } % 2 == 1
     }
 }
 
@@ -134,6 +127,6 @@ fun main() {
     // Answer 1: 6820
     println("Part 1: ${answer1(input)}")
 
-    // Answer 2: 1124
+    // Answer 2: 337
     println("Part 2: ${answer2(input)}")
 }
