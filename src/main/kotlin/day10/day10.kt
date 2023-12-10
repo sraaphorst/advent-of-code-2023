@@ -108,13 +108,13 @@ fun answer2(input: String): Int {
     val crossings = setOf(Pipe.VERTICAL, Pipe.NORTHEAST, Pipe.NORTHWEST)
     return (pipeMap.allCoords - mainCurvePoints).count { coord ->
         // We want the number of points inside the polygon that is the main curve.
-        // Cast a ray to the west from (the top half of) each point not on the main curve.
+        // Cast a ray to the west from (the top half of) each point not on the main curve and find the main curve
+        // points it hits.
         // Count the number of times it intersections VERTICAL, NORTHEAST, and NORTHWEST (due to casting from top half).
         // By the ray casting algorithm for polygon point inclusion from the Jordan Curve Theorem,
         // an even number of crossings means a point is out, and an odd number means a point is inside.
-        (0..<coord.first)
-            .map { it to coord.second }
-            .intersect(mainCurvePoints)
+        val range = 0..<coord.first
+        mainCurvePoints.filter { it.first in range && it.second == coord.second  }
             .count { pipeMap.getValue(it) in crossings } % 2 == 1
     }
 }
