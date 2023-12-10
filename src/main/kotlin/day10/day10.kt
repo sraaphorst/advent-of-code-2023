@@ -38,7 +38,8 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
     val height = grid.keys.maxBy { it.second }.second
 
     fun neighbourhood(coord: Coord): Set<Coord> =
-        neighbours
+        Direction
+            .entries
             .map { (coord.first + it.deltaX) to (coord.second + it.deltaY) }
             .filter { it.first in (0..<width) && it.second in  (0..<height)}.toSet()
 
@@ -63,8 +64,6 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
     val allCoords: Set<Coord> = grid.keys
 
     companion object {
-        private val neighbours = setOf(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)
-
         fun parse(input: String): PipeMap {
             // Convert into a map <Coord, Char> to start with.
             val grid = input
@@ -117,6 +116,8 @@ fun answer2(input: String): Int {
     // crossing the HORIZONTAL, SOUTHEAST, and SOUTHWEST pipe pieces will not.
     // In this case, we don't even bother counting the crossing number: we just alternate parity to determine
     // which points return true.
+    // This could be optimized by going left or right (or even up or down, which would require different logic) but
+    // the optimization time improvement is not worth the effort.
     val crossings = setOf(Pipe.VERTICAL, Pipe.NORTHEAST, Pipe.NORTHWEST)
     return (pipeMap.allCoords - mainCurvePoints).count { coord ->
         (0..<coord.first).fold(false) { parity, x ->
