@@ -38,7 +38,7 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
         val widthRange = 0..<grid.keys.maxBy { it.first }.first
         val heightRange = 0..<grid.keys.maxBy { it.second }.second
 
-        // Find the directions that lead out of this pipe.
+        // Find the directions that lead out of S by finding its two neighbours that lead into S.
         val directionsOut = Direction
             .entries
             .filter { dir ->
