@@ -60,7 +60,7 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
                 // We don't want to leave by how we came.
                 val directionOut = getValue(currCoord).directions.first { it != -directionIn }
                 aux(false, currCoord + directionOut, directionOut, curvePoints + currCoord)
-                }
+            }
         aux()
     }
 
@@ -76,13 +76,9 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
             val grid = input
                 .lines()
                 .withIndex()
-                .flatMap { (y, line) ->
-                    line
-                        .toList()
-                        .withIndex()
-                        .map { (x, ch) ->
-                            (x to y) to (Pipe.entries.find { it.symbol == ch } ?: error("No match for ${ch}."))
-                        }
+                .flatMap { (y, line) -> line
+                    .withIndex()
+                    .map { (x, c) -> (x to y) to (Pipe.entries.find { it.symbol == c } ?: error("No match for ${c}.")) }
                 }.toMap()
 
             val startCoord = grid.filterValues { it == Pipe.START }.keys.first()
