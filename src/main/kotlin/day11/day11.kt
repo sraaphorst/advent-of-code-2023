@@ -5,56 +5,42 @@ package day11
 
 import kotlin.math.abs
 
+private const val EMPTY_SPACE: Char = '.'
+private const val GALAXY: Char = '#'
 private typealias Coord = Pair<Long, Long>
 
-private data class Galaxy(val id: Int, val coordinates: Coord) {
-    operator fun minus(otherGalaxy: Galaxy): Long =
-        abs(coordinates.first - otherGalaxy.coordinates.first) +
-                abs(coordinates.second - otherGalaxy.coordinates.second)
+private fun manhattanDistance(c1: Coord, c2: Coord): Long =
+    abs(c1.first - c2.first) + abs(c1.second - c2.second)
 
-    companion object {
-        private const val EMPTY_SPACE: Char = '.'
-        private const val GALAXY: Char = '#'
+// To optimize, calculate the adjustments for each dataset (rows / columns) for each index.
+// This tells us how much we must adjust each coordinate by to get from the input data to the actual data.
+private fun calculateAdjustments(data: List<String>, emptyValue: Long): List<Long> {
+    // Get the indices that are empty in the data set, i.e. the lines that consist only of empty space.
+    val emptyIndices = data
+        .withIndex()
+        .filter { (_, lst) -> lst.all { it == EMPTY_SPACE } }
+        .map(IndexedValue<String>::index)
+        .toSet()
+    return data.indices.fold(listOf(0L)) { acc, index ->
+        acc + (acc.last() + if (index in emptyIndices) emptyValue - 1 else 0)
+    }.drop(1) // Drop the initial 0 used in the calculation.
+}
 
-        // To optimize, calculate the adjustments for each dataset (rows / columns) for each index.
-        // This tells us how much we must adjust each coordinate by to get from the input data to the actual data.
-        private fun calculateAdjustments(data: List<String>, emptyValue: Long): List<Long> {
-            // Get the indices that are empty in the data set, i.e. the lines that consist only of empty space.
-            val emptyIndices = data
-                .withIndex()
-                .filter { (_, lst) -> lst.all { it == EMPTY_SPACE } }
-                .map(IndexedValue<String>::index)
-                .toSet()
-            return data.indices.fold(listOf(0L)) { acc, index ->
-                acc + (acc.last() + if (index in emptyIndices) emptyValue - 1 else 0)
-            }.drop(1) // Drop the initial 0 used in the calculation.
-        }
+private fun parse(input: String, emptyValue: Long = 2): List<Coord> {
+    val rows = input.trim().lines()
+    val cols = (0..<rows.first().length).map { colIdx ->
+        rows.joinToString(separator = "") { it[colIdx].toString() }
+    }
 
-        fun parse(input: String, emptyValue: Long = 2): List<Galaxy> {
-            val rows = input
-                .trim()
-                .lines()
+    val rowAdjustments = calculateAdjustments(rows, emptyValue)
+    val colAdjustments = calculateAdjustments(cols, emptyValue)
 
-            val cols = (0..<rows.first().length).map { colIdx ->
-                rows.joinToString(separator = "") { it[colIdx].toString() }
-            }
-
-            val rowAdjustments = calculateAdjustments(rows, emptyValue)
-            val colAdjustments = calculateAdjustments(cols, emptyValue)
-
-            // Parse the galaxies.
-            return rows.withIndex().flatMap { (rIdx, row) ->
-                row.withIndex().mapNotNull { (cIdx, ch) -> if (ch == GALAXY) (rIdx to cIdx) else null }
-            }.withIndex().map { (idx, coordinates) ->
-                val (rIdx, cIdx) = coordinates
-                // Determine the adjustment to the coordinates.
-                val adjustedCoordinates = Coord(
-                    rIdx.toLong() + rowAdjustments[rIdx],
-                    cIdx.toLong() + colAdjustments[cIdx]
-                )
-                Galaxy(idx + 1, adjustedCoordinates)
-            }
-        }
+    // Parse the galaxy coordinates and adjust them.
+    return rows.withIndex().flatMap { (rIdx, row) ->
+        row.withIndex().mapNotNull { (cIdx, ch) -> if (ch == GALAXY) (rIdx to cIdx) else null }
+    }.map {
+        val (rIdx, cIdx) = it
+        rIdx.toLong() + rowAdjustments[rIdx] to cIdx.toLong() + colAdjustments[cIdx]
     }
 }
 
@@ -66,9 +52,9 @@ private fun <T> List<T>.uniquePairs(): List<Pair<T, T>> =
 }
 
 fun answer(input: String, emptyDistance: Long): Long =
-    Galaxy.parse(input, emptyDistance)
+    parse(input, emptyDistance)
         .uniquePairs()
-        .fold(0L) { acc, pair -> acc + (pair.first - pair.second) }
+        .fold(0L) { acc, pair -> acc + manhattanDistance(pair.first, pair.second) }
 
 fun answer1(input: String): Long =
     answer(input, 2)
