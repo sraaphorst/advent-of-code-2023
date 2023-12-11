@@ -34,26 +34,19 @@ private enum class Pipe(val symbol: Char, val directions: Set<Direction> = empty
 }
 
 private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>) {
-    val width = grid.keys.maxBy { it.first }.first
-    val height = grid.keys.maxBy { it.second }.second
-
-    private fun neighbourhood(coord: Coord): Set<Coord> =
-        Direction
-            .entries
-            .map { (coord.first + it.deltaX) to (coord.second + it.deltaY) }
-            .filter { it.first in (0..<width) && it.second in  (0..<height)}.toSet()
-
     private val startPiece: Pipe = run {
-        // Find the directions that lead into this pipe.
-        val neighbours = neighbourhood(startCoord)
-        val directionsIn = Direction.entries.filter { dir ->
-            neighbours.any { dir in grid.getValue(it).directions && it + dir == startCoord }
-        }
-        assert(directionsIn.size == 2) { "Start piece does not have two directions in." }
+        val widthRange = 0..<grid.keys.maxBy { it.first }.first
+        val heightRange = 0..<grid.keys.maxBy { it.second }.second
 
-        // Now translate to directions that lead out of this pipe.
-        // This will correspond to exactly one of the Pipe pieces
-        val directionsOut = directionsIn.map { -it }.toSet()
+        // Find the directions that lead out of this pipe.
+        val directionsOut = Direction
+            .entries
+            .filter { dir ->
+                val potentialNeighbour = startCoord + dir
+                potentialNeighbour.first in widthRange && potentialNeighbour.second in heightRange &&
+                        -dir in grid.getValue(potentialNeighbour).directions
+            }.toSet()
+        assert(directionsOut.size == 2) { "Start piece does not have two directions out." }
         Pipe.entries.first { it.directions == directionsOut }
     }
 
