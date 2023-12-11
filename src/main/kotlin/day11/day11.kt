@@ -26,7 +26,7 @@ private fun calculateAdjustments(data: List<String>, emptyValue: Long): List<Lon
     }.drop(1) // Drop the initial 0 used in the calculation.
 }
 
-private fun parse(input: String, emptyValue: Long = 2): List<Coord> {
+private fun parse(input: String, emptyValue: Long): List<Coord> {
     val rows = input.trim().lines()
     val cols = (0..<rows.first().length).map { colIdx ->
         rows.joinToString(separator = "") { it[colIdx].toString() }
@@ -38,8 +38,7 @@ private fun parse(input: String, emptyValue: Long = 2): List<Coord> {
     // Parse the galaxy coordinates and adjust them.
     return rows.withIndex().flatMap { (rIdx, row) ->
         row.withIndex().mapNotNull { (cIdx, ch) -> if (ch == GALAXY) (rIdx to cIdx) else null }
-    }.map {
-        val (rIdx, cIdx) = it
+    }.map { (rIdx, cIdx) ->
         rIdx.toLong() + rowAdjustments[rIdx] to cIdx.toLong() + colAdjustments[cIdx]
     }
 }
