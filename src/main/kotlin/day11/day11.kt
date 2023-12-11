@@ -13,12 +13,22 @@ private data class Galaxy(val id: Int, val coordinates: Coord) {
                 abs(coordinates.second - otherGalaxy.coordinates.second)
 
     companion object {
-        private fun emptyIndices(input: List<String>): Set<Int> =
-            input
+        private const val EMPTY_SPACE: Char = '.'
+        private const val GALAXY: Char = '#'
+
+        // To optimize, calculate the adjustments for each dataset (rows / columns) for each index.
+        // This tells us how much we must adjust each coordinate by to get from the input data to the actual data.
+        private fun calculateAdjustments(data: List<String>, emptyValue: Long): List<Long> {
+            // Get the indices that are empty in the data set, i.e. the lines that consist only of empty space.
+            val emptyIndices = data
                 .withIndex()
-                .filter { (_, lst) -> lst.all { it == '.' } }
+                .filter { (_, lst) -> lst.all { it == EMPTY_SPACE } }
                 .map(IndexedValue<String>::index)
                 .toSet()
+            return data.indices.fold(listOf(0L)) { acc, index ->
+                acc + (acc.last() + if (index in emptyIndices) emptyValue - 1 else 0)
+            }.drop(1) // Drop the initial 0 used in the calculation.
+        }
 
         fun parse(input: String, emptyValue: Long = 2): List<Galaxy> {
             val rows = input
@@ -29,18 +39,18 @@ private data class Galaxy(val id: Int, val coordinates: Coord) {
                 rows.joinToString(separator = "") { it[colIdx].toString() }
             }
 
-            val emptyRows = emptyIndices(rows)
-            val emptyCols = emptyIndices(cols)
+            val rowAdjustments = calculateAdjustments(rows, emptyValue)
+            val colAdjustments = calculateAdjustments(cols, emptyValue)
 
             // Parse the galaxies.
             return rows.withIndex().flatMap { (rIdx, row) ->
-                row.withIndex().mapNotNull { (cIdx, ch) -> if (ch == '#') (rIdx to cIdx) else null }
+                row.withIndex().mapNotNull { (cIdx, ch) -> if (ch == GALAXY) (rIdx to cIdx) else null }
             }.withIndex().map { (idx, coordinates) ->
                 val (rIdx, cIdx) = coordinates
                 // Determine the adjustment to the coordinates.
                 val adjustedCoordinates = Coord(
-                    rIdx.toLong() + (emptyValue - 1) * emptyRows.count { it <= rIdx },
-                    cIdx.toLong() + (emptyValue - 1) * emptyCols.count { it <= cIdx }
+                    rIdx.toLong() + rowAdjustments[rIdx],
+                    cIdx.toLong() + colAdjustments[cIdx]
                 )
                 Galaxy(idx + 1, adjustedCoordinates)
             }
