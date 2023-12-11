@@ -1,4 +1,4 @@
-// Advent of Code 2023, Day 09.
+// Advent of Code 2023, Day 10.
 // By Sebastian Raaphorst, 2023.
 
 package day10
