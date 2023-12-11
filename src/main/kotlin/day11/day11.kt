@@ -47,8 +47,8 @@ private fun <T> List<T>.uniquePairs(): List<Pair<T, T>> =
     indices.flatMap { i ->
         ((i + 1)..<size).map { j ->
             this[i] to this[j]
+        }
     }
-}
 
 fun answer(input: String, emptyDistance: Long): Long =
     parse(input, emptyDistance)
