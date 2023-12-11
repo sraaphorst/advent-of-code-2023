@@ -50,6 +50,20 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
         Pipe.entries.first { it.directions == directionsOut }
     }
 
+    val mainCurve = run {
+        tailrec fun aux(start: Boolean = true,
+                        currCoord: Coord = startCoord,
+                        directionIn: Direction = getValue(startCoord).directions.first(),
+                        curvePoints: Set<Coord> = emptySet()): Set<Coord> =
+            if (!start && currCoord == startCoord) curvePoints
+            else {
+                // We don't want to leave by how we came.
+                val directionOut = getValue(currCoord).directions.first { it != -directionIn }
+                aux(false, currCoord + directionOut, directionOut, curvePoints + currCoord)
+                }
+        aux()
+    }
+
     fun getValue(coord: Coord): Pipe =
         if (coord == startCoord) startPiece
         else grid.getValue(coord)
@@ -77,37 +91,21 @@ private class PipeMap(val startCoord: Coord, private val grid: Map<Coord, Pipe>)
     }
 }
 
-private fun findMainCurve(pipeMap: PipeMap): Set<Coord> {
-    tailrec fun aux(start: Boolean = true,
-                    currCoord: Coord = pipeMap.startCoord,
-                    directionIn: Direction = pipeMap.getValue(pipeMap.startCoord).directions.first(),
-                    curvePoints: Set<Coord> = emptySet()): Set<Coord> =
-        if (!start && currCoord == pipeMap.startCoord) curvePoints
-        else {
-            // We don't want to leave by how we came.
-            val badDirectionOut = -directionIn
-            val directionOut = pipeMap.getValue(currCoord).directions.first { it != badDirectionOut }
-            aux(false, currCoord + directionOut, directionOut, curvePoints + currCoord)
-        }
-    return aux()
-}
-
 fun answer1(input: String): Int =
-    findMainCurve(PipeMap.parse(input)).size / 2
+    PipeMap.parse(input).mainCurve.size / 2
 
 fun answer2(input: String): Int {
     val pipeMap = PipeMap.parse(input)
-    val mainCurvePoints = findMainCurve(pipeMap)
     val crossings = setOf(Pipe.VERTICAL, Pipe.NORTHEAST, Pipe.NORTHWEST)
-    return (pipeMap.allCoords - mainCurvePoints).count { coord ->
+    return (pipeMap.allCoords - pipeMap.mainCurve).count { coord ->
         // We want the number of points inside the polygon that is the main curve.
         // Cast a ray to the west from (the top half of) each point not on the main curve and find the main curve
         // points it hits.
         // Count the number of times it intersections VERTICAL, NORTHEAST, and NORTHWEST (due to casting from top half).
         // By the ray casting algorithm for polygon point inclusion from the Jordan Curve Theorem,
         // an even number of crossings means a point is out, and an odd number means a point is inside.
-        val range = 0..<coord.first
-        mainCurvePoints.filter { it.first in range && it.second == coord.second  }
+        val xRange = 0..<coord.first
+        pipeMap.mainCurve.filter { it.first in xRange && it.second == coord.second  }
             .count { pipeMap.getValue(it) in crossings } % 2 == 1
     }
 }
