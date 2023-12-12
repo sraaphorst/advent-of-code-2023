@@ -34,23 +34,23 @@ private fun parse(input: String): List<Input> =
 // As I was sick and feverish today, code heavily inspired by solution by Python solution by reddit user NimbyDagda:
 // https://github.com/AshGriffiths/advent_of_code/blob/main/2023/day_twelve/day12.py
 private fun answerAux(input: Input, memoizedFunc: (Input) -> Long): Long {
-    val (springs, groups) = input
-    if (groups.isEmpty())
+    val (springs, counts) = input
+    if (counts.isEmpty())
         // If everything remaining in springs is either unknown or not a spring, then this is acceptable.
         return if (springs.all { it == '.' || it == '?' }) 1L else 0L
     else {
-        val firstGroup = groups.first()
-        val remainingGroups = groups.drop(1)
+        val firstCount = counts.first()
+        val remainingCounts = counts.drop(1)
 
-        // Add the sizes of the remaining groups, and 1 for each gap.
-        val remainingSpaces = remainingGroups.sum() + remainingGroups.size
+        // Add the sizes of the remaining counts, and 1 for each gap.
+        val remainingSpaces = remainingCounts.sum() + remainingCounts.size
 
-        val upperBound = springs.length - remainingSpaces - firstGroup
+        val upperBound = springs.length - remainingSpaces - firstCount
         return (0..upperBound).fold(0L) { acc, idx ->
-            val possibleSprings = ".".repeat(idx) + "#".repeat(firstGroup) + "."
+            val possibleSprings = ".".repeat(idx) + "#".repeat(firstCount) + "."
             if (springs.zip(possibleSprings).all { (spring, possibleSpring) ->
                 spring == possibleSpring || spring == '?' })
-                acc + memoizedFunc(Input(springs.drop(possibleSprings.length), remainingGroups))
+                acc + memoizedFunc(Input(springs.drop(possibleSprings.length), remainingCounts))
             else acc
         }
     }
