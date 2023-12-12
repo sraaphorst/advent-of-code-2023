@@ -7,7 +7,9 @@ package day12
 private data class Input(val springs: String, val counts: List<Int>)
 
 // Tried using Arrow's arrow.core.MemoizedDeepRecursiveFunction, but code ran insanely long for part 2.
-// Instead. had to write my own memoize function.
+// This is probably because of complete lack of tail recursion.
+// Perhaps I will attempt to replace fold with tail recursive solution.
+// Instead, had to write my own memoize function.
 private fun <T, U> memoize(function: (T, (T) -> U) -> U): (T) -> U {
     val cache = mutableMapOf<T, U>()
     lateinit var memoizedFunctionWrapper: (T) -> U
