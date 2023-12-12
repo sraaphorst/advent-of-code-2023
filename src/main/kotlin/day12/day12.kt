@@ -3,10 +3,9 @@
 
 package day12
 
-import arrow.core.MemoizedDeepRecursiveFunction
-
 private data class Input(val springs: String, val counts: List<Int>)
 
+// Tried using Arrow's arrow.core.MemoizedDeepRecursiveFunction, but code ran insanely long.
 private fun memoize(function: (Input, (Input) -> Long) -> Long): (Input) -> Long {
     val cache = mutableMapOf<Input, Long>()
     lateinit var memoizedFunctionWrapper: (Input) -> Long
@@ -52,30 +51,6 @@ private fun answerAux(input: Input, memoizedFunc: (Input) -> Long): Long {
 
 private val answer = memoize(::answerAux)
 
-private val answer2 = MemoizedDeepRecursiveFunction<Input, Int> { (springs, groups) ->
-    when {
-        groups.isEmpty() ->
-            if (springs.all { it == '.' || it == '?' }) 1 else 0
-
-        else -> {
-            val firstGroup = groups.first()
-            val remainingGroups = groups.drop(1)
-
-            // Add the sizes of the remaining groups, and 1 for each gap.
-            val remainingSpaces = remainingGroups.sum() + remainingGroups.size
-
-            val upperBound = springs.length - remainingSpaces - firstGroup
-            (0..upperBound).fold(0) { acc, idx ->
-                val possibleSprings = ".".repeat(idx) + "#".repeat(firstGroup) + "."
-                if (springs.zip(possibleSprings)
-                        .all { (spring, possibleSpring) -> spring == possibleSpring || spring == '?' }
-                )
-                    acc + callRecursive(Input(springs.drop(possibleSprings.length), remainingGroups))
-                else acc
-            }
-        }
-    }
-}
 
 fun answer1(input: String): Long =
     parse(input).sumOf(answer::invoke)
@@ -83,16 +58,8 @@ fun answer1(input: String): Long =
 fun answer2(input: String): Long =
     parse(input)
         .map { (springs, counts) ->
-            val newSprings = List (5) { springs }.joinToString("?")
-            val newCounts = List(5) { counts }.flatten()
-            println("springs -> $springs")
-            println("new springs -> $newSprings")
-            println("counts -> $counts")
-            println("new counts -> $newCounts")
-            Input(newSprings, newCounts) }
-        .map(answer::invoke)
-        .also { println(it) }
-        .sum()
+            Input(List (5) { springs }.joinToString("?") , List(5) { counts }.flatten()) }
+        .sumOf(answer::invoke)
 
 fun main() {
     val input = object {}.javaClass.getResource("/day12.txt")!!.readText()
