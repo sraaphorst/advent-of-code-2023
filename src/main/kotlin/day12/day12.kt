@@ -68,7 +68,7 @@ fun answer2(input: String): Long =
 fun main() {
     val input = object {}.javaClass.getResource("/day12.txt")!!.readText()
 
-    println("--- Day 11: Cosmic Expansion ---")
+    println("--- Day 12: Hot Springs ---")
 
     // Answer 1: 7716
     println("Part 1: ${answer1(input)}")
