@@ -36,7 +36,7 @@ private fun parse(input: String): List<Input> =
 private fun answerAux(input: Input, memoizedFunc: (Input) -> Long): Long {
     val (springs, groups) = input
     if (groups.isEmpty())
-    // If everything remaining in springs is either unknown or not a spring, then this is acceptable.
+        // If everything remaining in springs is either unknown or not a spring, then this is acceptable.
         return if (springs.all { it == '.' || it == '?' }) 1L else 0L
     else {
         val firstGroup = groups.first()
