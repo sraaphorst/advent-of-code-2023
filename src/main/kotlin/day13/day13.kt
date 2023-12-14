@@ -19,9 +19,7 @@ private enum class LineReflectionType {
 // This could be optimized somewhat (e.g. by passing the required LineReflectionType here),
 // but this works sufficiently fast.
 private fun checkLine(data: Data, line: Int): LineReflectionType {
-    // Check if xor of two Longs has exactly one bit set.
-    // This happens when we xor two Longs representing rows or columns together and they have a
-    // reflection with a smudge.
+    // Check if two Longs differ in exactly one bit, which represents a reflection with smudge.
     fun smudgedReflection(l1: Long, l2: Long): Boolean {
         val l = l1 xor l2
         return l != 0L && (l and (l - 1) == 0L)
