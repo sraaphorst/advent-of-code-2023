@@ -3,20 +3,21 @@
 
 package day13
 
-typealias Data = List<Long>
-typealias RowData = Data
-typealias ColData = Data
-typealias Terrain = Pair<RowData, ColData>
+private typealias Data = List<Long>
+private typealias RowData = Data
+private typealias ColData = Data
+private typealias Terrain = Pair<RowData, ColData>
 
 private enum class LineReflectionType {
     LineOfReflection,
     SmudgedLineOfReflection,
     NoReflection
 }
-// Determine if there is a line of reflection between data[line] and data[line+1]
-// that either:
-// 1. does not allow a smudge (part 1)
-// 2. requires a smudge (part 2)
+
+// Determine if there is a line of reflection between data[line] and data[line+1], and if so,
+// if it is a normal line of reflection or a smudged one.
+// This could be optimized somewhat (e.g. by passing the required LineReflectionType here),
+// but this works sufficiently fast.
 private fun checkLine(data: Data, line: Int): LineReflectionType {
     // Check if a Long has exactly one bit set. We use this to determine if
     fun smudgedReflection(l1: Long, l2: Long): Boolean {
@@ -51,9 +52,9 @@ private fun checkLine(data: Data, line: Int): LineReflectionType {
 private fun checkData(data: Data, lineReflectionType: LineReflectionType): Int? =
     (0..(data.size - 2)).firstOrNull { checkLine(data, it) == lineReflectionType }?.let { it + 1 }
 
-// Check the rows for a line of reflection:
-// 1. terrain.first are the rows, so if a value is returned, there are that many rows above it; and
-// 2. terrain.second are the columns, so if a value is returned, there are that many columns left of it.
+// Check the rows and columns for the required type of line of reflection.
+// 1. terrain.first are the rows, so if a value is returned by checkData, there are that many rows above it; and
+// 2. terrain.second are the columns, so if a value is returned by checkData, there are that many columns left of it.
 // As per the puzzle description:
 // 1. return 100 * the number of rows above a line of horizontal line of reflection; or
 // 2. return the number of columns to the left of a line of reflection.
