@@ -78,7 +78,7 @@ private fun parse(input: String): List<Terrain> =
         val cols = (0..<rows.first().length).map { colIdx ->
             rows.joinToString(separator = "") { it[colIdx].toString() }
         }
-        parseBoard(rows) to parseBoard(cols)
+        Terrain(parseBoard(rows), parseBoard(cols))
     }
 
 fun answer1(input: String): Int =
