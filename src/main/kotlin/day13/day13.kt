@@ -10,15 +10,14 @@ private typealias Terrain = Pair<RowData, ColData>
 
 private enum class ReflectionType {
     Reflection,
-    SmudgedReflection,
-    NoReflection
+    SmudgedReflection
 }
 
 // Determine if there is a line of reflection between data[line] and data[line+1], and if so,
 // if it is a normal line of reflection or a smudged one.
 // This could be optimized somewhat (e.g. by passing the required LineReflectionType here),
 // but this works sufficiently fast.
-private fun checkLine(data: Data, line: Int): ReflectionType {
+private fun checkLine(data: Data, line: Int): ReflectionType? {
     // Check if two Longs differ in exactly one bit, which represents a reflection with smudge.
     fun smudgedReflection(l1: Long, l2: Long): Boolean {
         val l = l1 xor l2
@@ -26,7 +25,7 @@ private fun checkLine(data: Data, line: Int): ReflectionType {
     }
 
     // At iteration idx, we compare lines (line - idx) and (line + idx + 1).
-    tailrec fun aux(idx: Int = 0, smudgeSeen: Boolean = false): ReflectionType = when {
+    tailrec fun aux(idx: Int = 0, smudgeSeen: Boolean = false): ReflectionType? = when {
         // Stop if we reach line + 1 or if the reflected line does not exist.
         idx == line + 1 || line + idx + 1 >= data.size ->
             if (smudgeSeen) ReflectionType.SmudgedReflection
@@ -41,7 +40,7 @@ private fun checkLine(data: Data, line: Int): ReflectionType {
             aux(idx + 1, true)
 
         // Either lines do not reflect, or reflect with a smudge and we have already seen one.
-        else -> ReflectionType.NoReflection
+        else -> null
     }
 
     return aux()
@@ -74,8 +73,8 @@ private fun parseBoard(data: List<String>): List<Long> =
     data.map(::stringToLong)
 
 private fun parse(input: String): List<Terrain> =
-    input.trim().split("\n\n").map {
-        val rows = it.lines()
+    input.trim().split("\n\n").map { terrainString ->
+        val rows = terrainString.lines()
         val cols = (0..<rows.first().length).map { colIdx ->
             rows.joinToString(separator = "") { it[colIdx].toString() }
         }
