@@ -19,28 +19,30 @@ private enum class LineReflectionType {
 // This could be optimized somewhat (e.g. by passing the required LineReflectionType here),
 // but this works sufficiently fast.
 private fun checkLine(data: Data, line: Int): LineReflectionType {
-    // Check if a Long has exactly one bit set. This happens when we xor two Longs representing
-    // rows or columns together and they have a reflection with a smudge.
+    // Check if xor of two Longs has exactly one bit set.
+    // This happens when we xor two Longs representing rows or columns together and they have a
+    // reflection with a smudge.
     fun smudgedReflection(l1: Long, l2: Long): Boolean {
         val l = l1 xor l2
         return l != 0L && (l and (l - 1) == 0L)
     }
 
+    // At iteration idx, we compare lines (line - idx) and (line + idx + 1).
     tailrec fun aux(idx: Int = 0, smudgeSeen: Boolean = false): LineReflectionType = when {
         // Stop if we reach line + 1 or if the reflected line does not exist.
         idx == line + 1 || line + idx + 1 >= data.size ->
             if (smudgeSeen) LineReflectionType.SmudgedLineOfReflection
             else LineReflectionType.LineOfReflection
 
-        // No smudge here. Propagate smudgeSeen.
+        // Lines reflect and no smudge here. Propagate smudgeSeen.
         data[line - idx] == data[line + idx + 1] ->
             aux(idx + 1, smudgeSeen)
 
-        // Smudge found.
+        // Lines reflect with smudge found. Propagate only if we have not yet seen a smudge.
         smudgedReflection(data[line - idx], data[line + idx + 1]) && !smudgeSeen ->
             aux(idx + 1, true)
 
-        // Either not equal, a second smudge found, or neither equal nor smudged equal.
+        // Either lines do not reflect, or reflect with a smudge and we have already seen one.
         else -> LineReflectionType.NoReflection
     }
 
