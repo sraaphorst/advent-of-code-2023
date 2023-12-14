@@ -48,7 +48,6 @@ private fun checkLine(data: Data, line: Int): ReflectionType? {
 
 // Check to see if there is a line of reflection of the type required.
 // If there is, we want to add 1 to indicate how many lines are before the line.
-// If not, we return null.
 private fun checkData(data: Data, reflectionType: ReflectionType): Int? =
     (0..(data.size - 2))
         .firstOrNull { checkLine(data, it) == reflectionType }
