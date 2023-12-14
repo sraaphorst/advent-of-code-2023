@@ -32,8 +32,8 @@ class Day13Test {
         assertEquals(405, answer1(input))
     }
 
-//    @Test
-//    fun `Problem 2 example`() {
-//        assertEquals(525152, answer2(input))
-//    }
+    @Test
+    fun `Problem 2 example`() {
+        assertEquals(400, answer2(input))
+    }
 }
