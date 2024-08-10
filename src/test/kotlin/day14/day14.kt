@@ -9,21 +9,16 @@ import kotlin.test.assertEquals
 class Day14Test {
     companion object {
         private val input = """
-            #.##..##.
-            ..#.##.#.
-            ##......#
-            ##......#
-            ..#.##.#.
-            ..##..##.
-            #.#.##.#.
-
-            #...##..#
-            #....#..#
-            ..##..###
-            #####.##.
-            #####.##.
-            ..##..###
-            #....#..#
+            O....#....
+            O.OO#....#
+            .....##...
+            OO.#O....O
+            .O.....O#.
+            O.#..O.#.#
+            ..O..#O..O
+            .......O..
+            #....###..
+            #OO..#....
         """.trimIndent()
     }
 
@@ -34,6 +29,6 @@ class Day14Test {
 
     @Test
     fun `Problem 2 example`() {
-        assertEquals(400, answer2(input))
+        assertEquals(64, answer2(input))
     }
 }
